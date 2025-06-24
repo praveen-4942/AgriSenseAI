@@ -36,6 +36,13 @@ AgriSenseAI is a smart farming system that uses sensor data and AI models to det
 ```bash
 pip install tensorflow keras opencv-python numpy twilio RPi.GPIO
 ```
+<prev>
+<p align="center">
+  <img src="Complete_setup.jpg" width="500" alt="Circuit Diagram"><br>
+  <b> RaspberryPi Connection</b>
+</p>
+</prev>
+
 
 ## 🚀 How to Run
 
