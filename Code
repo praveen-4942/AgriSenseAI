@@ -1,0 +1,149 @@
+import tensorflow as tf
+from keras.models import load_model
+import cv2
+import numpy as np
+import RPi.GPIO as GPIO
+import dht11
+import time
+from twilio.rest import Client
+
+# Initialize GPIO
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+# Set the GPIO pin connected to the DHT11 data pin
+dht11_pin = 27 
+sensor = dht11.DHT11(dht11_pin) # Create an instance of the DHT11 class
+
+# Set the GPIO pin connected to the SOILMOISTURE data pin
+SOIL_SENSOR_PIN = 4
+GPIO.setmode(GPIO.BCM)
+# Set up the soil sensor pin as input with a pull-down resistor
+GPIO.setup(SOIL_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Add pull-down resistor
+
+def read_soil_moisture():
+    #Reads the soil moisture sensor value and returns 1 (dry) or 0 (wet).
+    return GPIO.input(SOIL_SENSOR_PIN)
+
+# Read soil moisture and print the value
+soil_moisture = read_soil_moisture()
+print(f"Soil moisture: {soil_moisture} (Dry soil (irrigation needed): Dry, Wet soil (no need of irrigation): Wet)")  # Use f-string for formatted output
+
+# Optionally, add a loop to continuously read and print soil moisture:
+while True:
+    soil_moisture = read_soil_moisture()
+    result = sensor.read()
+    if result.is_valid():
+        print("Temp: {:.1f}*C  Humidity: {:.1f}%".format(result.temperature, result.humidity))
+        break
+    print(f"Soil moisture: {soil_moisture}")
+    time.sleep(1)
+ 
+#LOAD MODEL
+model1 = load_model('//home//Kalaiarasan//my_project//tomato.h5')
+model2 = load_model('//home//Kalaiarasan//my_project//pest.h5')
+
+class_names1 = ['Tomato__Bacterial_spot','Tomato_Early_blight','Tomato_Late_blight','Tomato_Leaf_Mold','Tomato_Septoria_leaf_spot','Tomato_Spider_mites Two-spotted','Tomato_Tomato_Yellow_Leaf_Curl_Virus','Tomato_Tomato_mosaic_virus','Tomato__healthy']
+class_names2 =['mites','armyworm','beetle','bollworm','grasshopper','aphids','mosquito','sawfly','stem_borer']
+
+def predict(model, img, class_names):
+    # Resize the image to match the model's expected input size
+    img = cv2.resize(img, (256, 256))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)
+    predictions = model.predict(img_array)
+    predicted_class = class_names[np.argmax(predictions[0])]
+    confidence = round(100 * np.max(predictions[0]), 2)
+    return predicted_class, confidence
+
+def preprocess_image(img):
+    # Convert the image to HSV color space
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # Define a range of HSV values for the leaf (adjust these values as needed)
+    lower_hue = 25
+    upper_hue = 75
+    lower_saturation = 50
+    upper_saturation = 255
+    lower_value = 50
+    upper_value = 255
+    # Define a range of HSV values for the leaf (adjust as needed)
+    lower_bound = np.array([lower_hue, lower_saturation, lower_value])
+    upper_bound = np.array([upper_hue, upper_saturation, upper_value])
+    # Create a mask for the leaf
+    mask = cv2.inRange(hsv, lower_bound, upper_bound)
+    # Apply the mask to the original image
+    masked_image = cv2.bitwise_and(img, img, mask=mask)
+    # Create a white background image
+    white_bg = np.ones_like(img) * 255
+    # Combine the masked image with the white background
+    result = cv2.addWeighted(masked_image, 1, white_bg, 1, 0)
+    return result
+disease_path1 = '//home//Kalaiarasan//my_project//Images//tomato mites.jpeg'
+disease1 = cv2.imread(disease_path1)
+
+disease_path2 = '//home//Kalaiarasan//my_project//Images//tomato septorial.jpeg'
+disease2 = cv2.imread(disease_path2)
+
+disease_path3 = '//home//Kalaiarasan//my_project//Images//tomato early blight.jpeg'
+disease3 = cv2.imread(disease_path3)
+
+disease_path4 = '//home//Kalaiarasan//my_project//Images//tomato leafmould.jpeg'
+disease4 = cv2.imread(disease_path4)
+
+disease_path5 = '//home//Kalaiarasan//my_project//Images//tomato mosaic virus.jpeg'
+disease5 = cv2.imread(disease_path5)
+
+pest_path1 = '//home//Kalaiarasan//my_project//Images//mosquito.jpeg'  # Replace with the path to your image
+pest1 = cv2.imread(pest_path1)
+
+pest_path2 = '//home//Kalaiarasan//my_project//Images//aphids.jpeg'  # Replace with the path to your image
+pest2 = cv2.imread(pest_path2)
+
+pest_path3 = '//home//Kalaiarasan//my_project//Images//beetle.jpeg'  # Replace with the path to your image
+pest3 = cv2.imread(pest_path3)
+
+pest_path4 = '//home//Kalaiarasan//my_project//Images//stemborer.jpeg'  # Replace with the path to your image
+pest4 = cv2.imread(pest_path4)
+pest_path5 = '//home//Kalaiarasan//my_project//Images//armyworms.jpeg'  # Replace with the path to your image
+pest5 = cv2.imread(pest_path5)
+# Preprocess the image
+processed_image1 = preprocess_image(pest1)
+# Predict the class
+predicted_disease1, confidence1 = predict(model1, disease1, class_names1)
+predicted_disease2, confidence2 = predict(model1, disease2, class_names1)
+predicted_disease3, confidence3 = predict(model1, disease3, class_names1)
+predicted_disease4, confidence4 = predict(model1, disease4, class_names1)
+predicted_disease5, confidence5 = predict(model1, disease5, class_names1)
+predicted_pest1, confidence6 = predict(model2, processed_image1, class_names2)
+predicted_pest2, confidence7 = predict(model2, pest2, class_names2)
+predicted_pest3, confidence8 = predict(model2, pest3, class_names2)
+predicted_pest4, confidence9 = predict(model2, pest4, class_names2)
+predicted_pest5, confidence10 = predict(model2, pest5, class_names2)
+
+print("predicted_disease1, confidence1 =",predicted_disease1, confidence1,'\n'
+      "predicted_disease2, confidence2 =",predicted_disease2, confidence2,'\n'
+      "predicted_disease3, confidence3 =",predicted_disease3, confidence3,'\n'
+      "predicted_disease4, confidence4 =",predicted_disease4, confidence4,'\n'
+      "predicted_disease5, confidence5 =",predicted_disease5, confidence5,'\n'
+      "predicted_pest1, confidence6 =",predicted_pest1, confidence6,'\n'
+      "predicted_pest2, confidence7 =",predicted_pest2, confidence7,'\n'
+      "predicted_pest3, confidence8 =",predicted_pest3, confidence8,'\n'
+      "predicted_pest4, confidence9 =",predicted_pest4, confidence9,'\n'
+      "predicted_pest5, confidence10 =",predicted_pest5, confidence10)
+
+TWILIO_ACCOUNT_SID = 'AC92e4fbb3a65821ca9d372ea27e886d58' # replace with your Account SID
+TWILIO_AUTH_TOKEN = '1eb5612b89788a87d2541c1a06c582c9' # replace with your Auth Token
+TWILIO_PHONE_SENDER = "+15103437231" # replace with the phone number you registered in twilio
+TWILIO_PHONE_RECIPIENT = "+919600404942" # replace with your phone number
+
+def send_text_alert():
+    """Sends an SMS text alert."""
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    message = client.messages.create(
+        to=TWILIO_PHONE_RECIPIENT,
+        from_=TWILIO_PHONE_SENDER,
+        body= f"SMART AGRICULTURAL MONITORING SYSTEM \n Soil moisture : {soil_moisture} \n Temperature : {result.temperature}*C \n Humidity : {result.humidity}% \n predicted_disease1 :{predicted_disease1}" )
+    print(message.sid)
+
+print(send_text_alert())
+
