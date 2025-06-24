@@ -35,8 +35,8 @@ AgriSenseAI is a smart farming system that uses sensor data and AI models to det
 
 <prev>
 <p align="center">
-  <img src="Flowchart.jpg" width="500" alt="Flowchart Diagram"><br>
-  <b> </b>
+  <img src="Flowchart" width="500" alt="Flowchart Diagram"><br>
+  <b> Flowchart </b>
 </p>
 </prev>
 
@@ -71,8 +71,8 @@ python3 agrisenseai.py
 ## 🌿 Input images 
 <prev>
 <p align="center">
-  <img src="Leaf_images.jpg" width="500" alt="Tomato"><br>
-  <b> </b>
+  <img src="Leaf_images" width="500" alt="Tomato"><br>
+  <b> Tomato leaf images</b>
 </p>
 </prev>
 
