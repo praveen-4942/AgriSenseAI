@@ -31,11 +31,24 @@ AgriSenseAI is a smart farming system that uses sensor data and AI models to det
 - RPi.GPIO  
 - dht11 Python module  
 
+## ⏳️ Flowchart
+
+<prev>
+<p align="center">
+  <img src="Flowchart.jpg" width="500" alt="Flowchart Diagram"><br>
+  <b> </b>
+</p>
+</prev>
+
+
 ## 📦 Installation
 
 ```bash
 pip install tensorflow keras opencv-python numpy twilio RPi.GPIO
 ```
+
+## Connections
+
 <prev>
 <p align="center">
   <img src="Complete_setup.jpg" width="500" alt="Circuit Diagram"><br>
@@ -54,6 +67,14 @@ pip install tensorflow keras opencv-python numpy twilio RPi.GPIO
 ```bash
 python3 agrisenseai.py
 ```
+
+## 🌿 Input images 
+<prev>
+<p align="center">
+  <img src="Leaf_images.jpg" width="500" alt="Tomato"><br>
+  <b> </b>
+</p>
+</prev>
 
 ## 🔍 Sample Output
 
