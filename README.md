@@ -81,9 +81,3 @@ predicted_disease1 : Tomato_Leaf_Mold
 Developed with ❤️ by Praveen  
 [GitHub](https://github.com/) • [LinkedIn](https://www.linkedin.com/in/praveen4942) • [Email](mailto:gpraveenkumar2005@gmail.com)
 
----
-
-> “Harvesting data to nourish the future.”
-```
-
-If you need a flowchart, logo, or even a contributor badge pack to add some flair to the repo, I’ve got you covered!
